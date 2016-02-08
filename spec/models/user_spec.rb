@@ -1,20 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  # let!(:user) { create(:user) }
+  let(:user) { build(:user) }
+  
+  required_fields = %w(email firstname lastname role_id)
 
-  # required_fields = %w(email password firstname lastname)
-
-  # required_fields = %w(email firstname lastname)
-
-  # include_examples 'test fields', required_fields, []
+  include_examples 'test fields', required_fields, []
   
   it {should have_db_column(:encrypted_password)}
   it {should respond_to(:password)}
-
-  # required_fields.each do |field|
-  #   it {should validate_presence_of(field)}
-  # end
 
   # it {should validate_uniqueness_of(:email)}
   it {should have_many(:orders)}
@@ -23,5 +17,30 @@ RSpec.describe User, type: :model do
   it 'user should be able to create a new order' do
     expect(build(:user).orders).to respond_to :new
   end
-  it 'user should be able to return a current order in progress'
+  it 'user should be able to return a current order in progress' do
+    @user = create(:user)
+    @order = create(:order, state: Order::STATUSES[1], user: @user)
+    expect(@user.current_order).to eql @order
+  end
+  it '.default_address' do
+    @user = create(:user)
+    create_list(:address, 3, user: @user)
+    @default_address = create(:address, user: @user, default: true)
+    create_list(:address, 3, user: @user)
+    expect(@user.default_address).to eql @default_address
+  end
+  context '.recent_orders' do
+    before do
+      @user = create(:user)
+      @orders = create_list(:order, 10, user: @user)
+      @recent_orders = @orders.reverse
+    end
+    it 'without parametrs' do
+      expect(@user.recent_orders).to eq(@recent_orders)
+    end
+    it 'with parametr' do
+      @recent_orders.pop(4)
+      expect(@user.recent_orders(6)).to eq(@recent_orders)
+    end
+  end
 end

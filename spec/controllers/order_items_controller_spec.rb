@@ -20,11 +20,13 @@ require 'rails_helper'
 
 RSpec.describe OrderItemsController, type: :controller do
 
+  let(:order) { create(:order) }
   # This should return the minimal set of attributes required to create a valid
   # OrderItem. As you add validations to OrderItem, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    build(:order_item, order: order).attributes
   }
 
   let(:invalid_attributes) {
@@ -39,7 +41,7 @@ RSpec.describe OrderItemsController, type: :controller do
   describe "GET #index" do
     it "assigns all order_items as @order_items" do
       order_item = OrderItem.create! valid_attributes
-      get :index, {}, valid_session
+      get :index, {order_id: order.id}, valid_session
       expect(assigns(:order_items)).to eq([order_item])
     end
   end
@@ -47,14 +49,14 @@ RSpec.describe OrderItemsController, type: :controller do
   describe "GET #show" do
     it "assigns the requested order_item as @order_item" do
       order_item = OrderItem.create! valid_attributes
-      get :show, {:id => order_item.to_param}, valid_session
+      get :show, {:id => order_item.to_param, order_id: order.id}, valid_session
       expect(assigns(:order_item)).to eq(order_item)
     end
   end
 
   describe "GET #new" do
     it "assigns a new order_item as @order_item" do
-      get :new, {}, valid_session
+      get :new, {order_id: order.id}, valid_session
       expect(assigns(:order_item)).to be_a_new(OrderItem)
     end
   end
@@ -62,7 +64,7 @@ RSpec.describe OrderItemsController, type: :controller do
   describe "GET #edit" do
     it "assigns the requested order_item as @order_item" do
       order_item = OrderItem.create! valid_attributes
-      get :edit, {:id => order_item.to_param}, valid_session
+      get :edit, {:id => order_item.to_param, order_id: order.id}, valid_session
       expect(assigns(:order_item)).to eq(order_item)
     end
   end
@@ -71,30 +73,30 @@ RSpec.describe OrderItemsController, type: :controller do
     context "with valid params" do
       it "creates a new OrderItem" do
         expect {
-          post :create, {:order_item => valid_attributes}, valid_session
+          post :create, {:order_item => valid_attributes, order_id: order.id}, valid_session
         }.to change(OrderItem, :count).by(1)
       end
 
       it "assigns a newly created order_item as @order_item" do
-        post :create, {:order_item => valid_attributes}, valid_session
+        post :create, {:order_item => valid_attributes, order_id: order.id}, valid_session
         expect(assigns(:order_item)).to be_a(OrderItem)
         expect(assigns(:order_item)).to be_persisted
       end
 
       it "redirects to the created order_item" do
-        post :create, {:order_item => valid_attributes}, valid_session
+        post :create, {:order_item => valid_attributes, order_id: order.id}, valid_session
         expect(response).to redirect_to(OrderItem.last)
       end
     end
 
     context "with invalid params" do
       it "assigns a newly created but unsaved order_item as @order_item" do
-        post :create, {:order_item => invalid_attributes}, valid_session
+        post :create, {:order_item => invalid_attributes, order_id: order.id}, valid_session
         expect(assigns(:order_item)).to be_a_new(OrderItem)
       end
 
       it "re-renders the 'new' template" do
-        post :create, {:order_item => invalid_attributes}, valid_session
+        post :create, {:order_item => invalid_attributes, order_id: order.id}, valid_session
         expect(response).to render_template("new")
       end
     end
@@ -103,25 +105,30 @@ RSpec.describe OrderItemsController, type: :controller do
   describe "PUT #update" do
     context "with valid params" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        # skip("Add a hash of attributes valid for your model")
+        build(:order_item).attributes
       }
 
       it "updates the requested order_item" do
         order_item = OrderItem.create! valid_attributes
-        put :update, {:id => order_item.to_param, :order_item => new_attributes}, valid_session
+        put :update, {:id => order_item.to_param, :order_item => new_attributes, order_id: order.id}, valid_session
         order_item.reload
-        skip("Add assertions for updated state")
+        # skip("Add assertions for updated state")
+        test_fields = %w(price quantity)
+        test_fields.each do |field|
+          expect(order_item[field]).to eq(new_attributes[field])
+        end
       end
 
       it "assigns the requested order_item as @order_item" do
         order_item = OrderItem.create! valid_attributes
-        put :update, {:id => order_item.to_param, :order_item => valid_attributes}, valid_session
+        put :update, {:id => order_item.to_param, :order_item => valid_attributes, order_id: order.id}, valid_session
         expect(assigns(:order_item)).to eq(order_item)
       end
 
       it "redirects to the order_item" do
         order_item = OrderItem.create! valid_attributes
-        put :update, {:id => order_item.to_param, :order_item => valid_attributes}, valid_session
+        put :update, {:id => order_item.to_param, :order_item => valid_attributes, order_id: order.id}, valid_session
         expect(response).to redirect_to(order_item)
       end
     end
@@ -129,13 +136,13 @@ RSpec.describe OrderItemsController, type: :controller do
     context "with invalid params" do
       it "assigns the order_item as @order_item" do
         order_item = OrderItem.create! valid_attributes
-        put :update, {:id => order_item.to_param, :order_item => invalid_attributes}, valid_session
+        put :update, {:id => order_item.to_param, :order_item => invalid_attributes, order_id: order.id}, valid_session
         expect(assigns(:order_item)).to eq(order_item)
       end
 
       it "re-renders the 'edit' template" do
         order_item = OrderItem.create! valid_attributes
-        put :update, {:id => order_item.to_param, :order_item => invalid_attributes}, valid_session
+        put :update, {:id => order_item.to_param, :order_item => invalid_attributes, order_id: order.id}, valid_session
         expect(response).to render_template("edit")
       end
     end
@@ -145,13 +152,13 @@ RSpec.describe OrderItemsController, type: :controller do
     it "destroys the requested order_item" do
       order_item = OrderItem.create! valid_attributes
       expect {
-        delete :destroy, {:id => order_item.to_param}, valid_session
+        delete :destroy, {:id => order_item.to_param, order_id: order.id}, valid_session
       }.to change(OrderItem, :count).by(-1)
     end
 
     it "redirects to the order_items list" do
       order_item = OrderItem.create! valid_attributes
-      delete :destroy, {:id => order_item.to_param}, valid_session
+      delete :destroy, {:id => order_item.to_param, order_id: order.id}, valid_session
       expect(response).to redirect_to(order_items_url)
     end
   end

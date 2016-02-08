@@ -1,10 +1,11 @@
 class RatingsController < ApplicationController
-  before_action :set_rating, only: [:show, :edit, :update, :destroy]
+  load_and_authorize_resource
+  # before_action :set_rating, only: [:show, :edit, :update, :destroy]
 
   # GET /ratings
   # GET /ratings.json
   def index
-    @ratings = Rating.all
+    # @ratings = Rating.all
   end
 
   # GET /ratings/1

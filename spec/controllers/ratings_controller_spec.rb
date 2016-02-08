@@ -24,7 +24,8 @@ RSpec.describe RatingsController, type: :controller do
   # Rating. As you add validations to Rating, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    build(:rating).attributes
   }
 
   let(:invalid_attributes) {
@@ -103,14 +104,19 @@ RSpec.describe RatingsController, type: :controller do
   describe "PUT #update" do
     context "with valid params" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        # skip("Add a hash of attributes valid for your model")
+        build(:rating).attributes
       }
 
       it "updates the requested rating" do
         rating = Rating.create! valid_attributes
         put :update, {:id => rating.to_param, :rating => new_attributes}, valid_session
         rating.reload
-        skip("Add assertions for updated state")
+        # skip("Add assertions for updated state")
+        test_fields = %w(review rating)
+        test_fields.each do |field|
+          expect(rating[field]).to eq(new_attributes[field])
+        end
       end
 
       it "assigns the requested rating as @rating" do

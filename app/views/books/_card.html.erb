@@ -1,0 +1,29 @@
+<div id="book-header">
+    <div id="book-title">
+        <%= card.title %>
+    </div>
+    <div id="book-author">
+        by 
+        <%= link_to card.author, card.author %>
+    </div>
+</div>
+    
+<div id="book-details">    
+    <div id="book-image">
+      <%= image_tag("blank_book.jpg") %>
+    </div>
+    
+    <div id="book-decription">
+      <%= card.description %>
+    </div>
+</div>
+
+<div id="buyer-section">
+    <div id="book-price">
+      $<%= card.price %>
+    </div>
+    <div id="to-order">
+      <%= number_field_tag card.stock %>
+      <%= link_to 'Add to cart', add_to_cart_path(card) %>
+    </div>
+</div>

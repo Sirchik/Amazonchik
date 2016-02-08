@@ -24,7 +24,8 @@ RSpec.describe OrdersController, type: :controller do
   # Order. As you add validations to Order, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    build(:order).attributes
   }
 
   let(:invalid_attributes) {
@@ -103,14 +104,19 @@ RSpec.describe OrdersController, type: :controller do
   describe "PUT #update" do
     context "with valid params" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        # skip("Add a hash of attributes valid for your model")
+        build(:order).attributes
       }
 
       it "updates the requested order" do
         order = Order.create! valid_attributes
         put :update, {:id => order.to_param, :order => new_attributes}, valid_session
         order.reload
-        skip("Add assertions for updated state")
+        # skip("Add assertions for updated state")
+        test_fields = %w(total_price state billing_address shipping_address completed_date)
+        test_fields.each do |field|
+          expect(order[field]).to eq(new_attributes[field])
+        end
       end
 
       it "assigns the requested order as @order" do

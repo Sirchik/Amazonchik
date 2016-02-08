@@ -24,7 +24,8 @@ RSpec.describe CreditCardsController, type: :controller do
   # CreditCard. As you add validations to CreditCard, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    build(:credit_card).attributes
   }
 
   let(:invalid_attributes) {
@@ -103,14 +104,19 @@ RSpec.describe CreditCardsController, type: :controller do
   describe "PUT #update" do
     context "with valid params" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        # skip("Add a hash of attributes valid for your model")
+        build(:credit_card).attributes
       }
 
       it "updates the requested credit_card" do
         credit_card = CreditCard.create! valid_attributes
         put :update, {:id => credit_card.to_param, :credit_card => new_attributes}, valid_session
         credit_card.reload
-        skip("Add assertions for updated state")
+        # skip("Add assertions for updated state")
+        test_fields = %w(number cvv exp_month exp_year firstname lastname)
+        test_fields.each do |field|
+          expect(credit_card[field]).to eq(new_attributes[field])
+        end
       end
 
       it "assigns the requested credit_card as @credit_card" do

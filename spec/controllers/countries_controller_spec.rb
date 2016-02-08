@@ -24,7 +24,8 @@ RSpec.describe CountriesController, type: :controller do
   # Country. As you add validations to Country, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    # skip("Add a hash of attributes valid for your model")
+    build(:country).attributes
   }
 
   let(:invalid_attributes) {
@@ -103,14 +104,19 @@ RSpec.describe CountriesController, type: :controller do
   describe "PUT #update" do
     context "with valid params" do
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        # skip("Add a hash of attributes valid for your model")
+        build(:country).attributes
       }
 
       it "updates the requested country" do
         country = Country.create! valid_attributes
         put :update, {:id => country.to_param, :country => new_attributes}, valid_session
         country.reload
-        skip("Add assertions for updated state")
+        # skip("Add assertions for updated state")
+        test_fields = %w(name)
+        test_fields.each do |field|
+          expect(country[field]).to eq(new_attributes[field])
+        end
       end
 
       it "assigns the requested country as @country" do

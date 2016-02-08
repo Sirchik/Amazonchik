@@ -1,15 +1,21 @@
 Rails.application.routes.draw do
   mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   resources :addresses
-  resources :order_items
-  resources :orders
+  resources :orders, :except => [:new, :destroy] do
+    resources :order_items, :only => [:destroy]
+  end
+    
   resources :credit_cards
   resources :countries
   resources :ratings
-  devise_for :users
+  devise_for :users, :controllers => { :omniauth_callbacks => "omniauth_callbacks" }
   resources :books
   resources :authors
   resources :categories
+  get 'cart/:id' => 'orders#add_to_cart', as: 'add_to_cart'
+  get 'cart' => 'orders#show_cart'
+  get 'cart_clear' => 'orders#clear_cart', as: 'clear_cart'
+  root 'books#bestsellers'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

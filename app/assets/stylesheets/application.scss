@@ -1,0 +1,19 @@
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+#book-title {
+    font-size: 2em;
+    display: inline;
+}
+#book-author, #book-price, #to-order {
+    display: inline;
+}
+#book-price {
+    font-size: 2em;
+}
+#book-image {
+    float: left;
+}
+#book-details {
+    display: inline-block;
+}

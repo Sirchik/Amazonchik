@@ -1,10 +1,11 @@
 class BooksController < ApplicationController
-  before_action :set_book, only: [:show, :edit, :update, :destroy]
+  load_and_authorize_resource  
+  # before_action :set_book, only: [:show, :edit, :update, :destroy]
 
   # GET /books
   # GET /books.json
   def index
-    @books = Book.all
+    # @books = Book.all
   end
 
   # GET /books/1
@@ -59,6 +60,10 @@ class BooksController < ApplicationController
       format.html { redirect_to books_url, notice: 'Book was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+  
+  def bestsellers
+    @bestsellers = Book.bestsellers(3)
   end
 
   private
