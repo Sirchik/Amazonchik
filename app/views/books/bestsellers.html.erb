@@ -11,7 +11,9 @@
    <div class = "carousel-inner">
       <% @bestsellers.each_with_index do |item, index| %>
           <div class = "item<%= index == 0 ? " active" : "" %>">
+            <div id="background">
             <%= render partial: 'card', object: item %>
+            </div>
           </div>
       <% end %>
    </div>
@@ -22,4 +24,6 @@
    
 </div>
 
-Welcome to our amazing bookstore! Choose anything you wish, we'll ship it anywhere!
+<center>
+   <h2>Welcome to our amazing bookstore!<br/>Choose anything you wish, we'll ship it anywhere!</h2>
+</center>
