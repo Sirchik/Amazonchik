@@ -19,7 +19,7 @@ RSpec.describe User, type: :model do
   end
   it 'user should be able to return a current order in progress' do
     @user = create(:user)
-    @order = create(:order, state: Order::STATUSES[1], user: @user)
+    @order = create(:order, state: 'in_progress', user: @user)
     expect(@user.current_order).to eql @order
   end
   it '.default_address' do

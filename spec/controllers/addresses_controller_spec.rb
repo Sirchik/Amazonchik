@@ -20,6 +20,15 @@ require 'rails_helper'
 
 RSpec.describe AddressesController, type: :controller do
 
+  before do
+    request.env["devise.mapping"] = Devise.mappings[:user]
+    @user = create(:user)
+    @ability = Object.new
+    @ability.extend(CanCan::Ability)
+    allow(@controller).to receive(:current_ability).and_return(@ability)
+    @ability.can :manage, :all
+    sign_in(@user)
+  end
 
   # This should return the minimal set of attributes required to create a valid
   # Address. As you add validations to Address, be sure to
@@ -27,6 +36,7 @@ RSpec.describe AddressesController, type: :controller do
   let(:valid_attributes) {
     # skip("Add a hash of attributes valid for your model")
     build(:address).attributes
+    # @address_attributes
   }
 
   let(:invalid_attributes) {

@@ -1,5 +1,6 @@
 class RatingsController < ApplicationController
-  load_and_authorize_resource
+  load_and_authorize_resource :book
+  load_and_authorize_resource :rating, :through => :book
   # before_action :set_rating, only: [:show, :edit, :update, :destroy]
 
   # GET /ratings
@@ -25,11 +26,14 @@ class RatingsController < ApplicationController
   # POST /ratings
   # POST /ratings.json
   def create
+    # byebug
     @rating = Rating.new(rating_params)
+    @rating.user = current_user
+    @rating.book_id = params[:book_id]
 
     respond_to do |format|
       if @rating.save
-        format.html { redirect_to @rating, notice: 'Rating was successfully created.' }
+        format.html { redirect_to @rating.book, notice: 'Rating was successfully created.' }
         format.json { render :show, status: :created, location: @rating }
       else
         format.html { render :new }
@@ -43,7 +47,7 @@ class RatingsController < ApplicationController
   def update
     respond_to do |format|
       if @rating.update(rating_params)
-        format.html { redirect_to @rating, notice: 'Rating was successfully updated.' }
+        format.html { redirect_to @rating.book, notice: 'Rating was successfully updated.' }
         format.json { render :show, status: :ok, location: @rating }
       else
         format.html { render :edit }
@@ -57,7 +61,7 @@ class RatingsController < ApplicationController
   def destroy
     @rating.destroy
     respond_to do |format|
-      format.html { redirect_to ratings_url, notice: 'Rating was successfully destroyed.' }
+      format.html { redirect_to @rating.book, notice: 'Rating was successfully destroyed.' } #было ratings_url
       format.json { head :no_content }
     end
   end

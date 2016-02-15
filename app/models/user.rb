@@ -21,7 +21,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
          
   def current_order
-    orders.where(state: "in progress").last
+    orders.where(state: "in_progress").last
   end
   
   def default_address
@@ -61,6 +61,18 @@ class User < ActiveRecord::Base
         user.uid = session["devise.facebook_data"]["uid"]
       end
     end
+  end
+  
+  def to_s
+    "#{firstname} #{lastname}"
+  end
+  
+  def orders_by_status
+    orders = {}
+    Order::STATUSES.each do |status|
+      orders[status] = Order.where(state: status, user_id: id)
+    end
+    orders
   end
 
 private

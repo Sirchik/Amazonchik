@@ -9,7 +9,8 @@ class Ability
     
     alias_action :create, :read, :update, :destroy, :to => :crud
     
-    can :read, [Book, Category, Author]                   
+    can :read, [Book, Category, Author]
+    can :read, Rating, :approved => true
     can :bestsellers, Book
     can [:show_cart, :add_to_cart, :add_item, :clear_cart], Order, user_id: user.id
     can :destroy, OrderItem, order: { user_id: user.id }
@@ -17,7 +18,8 @@ class Ability
     # can :manage, :all
     unless user.new_record?
       # can :dashboard                  # allow access to dashboard
-      can :read, Order, :user_id => user.id
+      can :read, Order, user_id: user.id
+      can :create, Rating
       if user.role.name == 'Admin'
         # can :access, :rails_admin       # only allow admin users to access Rails Admin
         can :manage, :all             

@@ -20,6 +20,16 @@ require 'rails_helper'
 
 RSpec.describe AuthorsController, type: :controller do
 
+  before do
+    request.env["devise.mapping"] = Devise.mappings[:user]
+    @user = create(:user)
+    @ability = Object.new
+    @ability.extend(CanCan::Ability)
+    allow(@controller).to receive(:current_ability).and_return(@ability)
+    @ability.can :manage, :all
+    sign_in(@user)
+  end
+
   let(:author) { build(:author) }
   let(:other_author) { build(:author) }
   # This should return the minimal set of attributes required to create a valid

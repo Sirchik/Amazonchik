@@ -12,6 +12,7 @@ class OrdersController < ApplicationController
     # elsif Manager || Admin 
       # @orders = Order.all
     # end
+    # @orders = current_user.orders_by_status
     
   end
 
@@ -77,9 +78,11 @@ class OrdersController < ApplicationController
   end
   
   def add_to_cart
+    # byebug
     id = params[:id]
+    quantity = params[:quantity].to_i
     cart = get_or_create_order_from_session
-    cart.add_item(id)
+    cart.add_item(id, quantity)
     cart.save
     redirect_to cart_url
   end

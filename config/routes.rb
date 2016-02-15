@@ -7,12 +7,15 @@ Rails.application.routes.draw do
     
   resources :credit_cards
   resources :countries
-  resources :ratings
   devise_for :users, :controllers => { :omniauth_callbacks => "omniauth_callbacks" }
-  resources :books
+  
+  resources :books do
+    resources :ratings
+  end
+  
   resources :authors
   resources :categories
-  get 'cart/:id' => 'orders#add_to_cart', as: 'add_to_cart'
+  post 'cart/:id' => 'orders#add_to_cart', as: 'add_to_cart'
   get 'cart' => 'orders#show_cart'
   get 'cart_clear' => 'orders#clear_cart', as: 'clear_cart'
   root 'books#bestsellers'
