@@ -50,6 +50,9 @@ class OrdersController < ApplicationController
   # PATCH/PUT /orders/1
   # PATCH/PUT /orders/1.json
   def update
+    # byebug
+    @order.set_shipping(params[:shipping][:id]) if params[:shipping]
+    # @order.set_coupon_by_code(params[:coupon]) if params[:coupon]
     respond_to do |format|
       if @order.update(order_params)
         format.html { redirect_to @order, notice: 'Order was successfully updated.' }
@@ -95,10 +98,38 @@ class OrdersController < ApplicationController
     ensure
       session[:order_id] = nil
       respond_to do |format|
-        format.html { redirect_to books_url, notice: 'Order was successfully destroyed.' }
+        format.html { redirect_to books_url, notice: 'Cart is now empty.' }
         format.json { head :no_content }
       end
     end
+  end
+  
+  def checkout
+    @steps = ['address', 'delivery', 'payment', 'confirm', 'complete']
+    @user = current_user
+    @order = get_or_create_order_from_session
+    render 'orders/checkout/checkout'
+  end
+  
+  def place
+    if @order.may_process?
+      @order.process
+    else
+      respond_to do |format|
+        format.html { redirect_to @order, notice: "Order can't be processed. Contact with support." }
+      end
+    end
+    redirect_to orders_path
+  end
+  
+  def set_coupon
+    @order = get_or_create_order_from_session
+    # byebug
+    coupon = params[:coupon]
+    # return if !coupon
+    status = @order.set_coupon_by_code(coupon)
+    render json: { total_price: @order.total_price, status: status, coupon: ({code: coupon, discount: @order.coupon.discount} if @order.coupon) }
+    # render json: { total_price: 100.00, status: :not_found }
   end
       
   private

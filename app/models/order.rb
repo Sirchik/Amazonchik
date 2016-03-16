@@ -6,6 +6,7 @@ class Order < ActiveRecord::Base
   
   belongs_to :user
   belongs_to :credit_card
+  belongs_to :coupon
   has_many :order_items, dependent: :destroy
   has_one :order_shipping
   has_one :shipping, through: :order_shipping
@@ -15,8 +16,8 @@ class Order < ActiveRecord::Base
   validates :total_price, presence: true
   # validates :completed_date, presence: true
   validates :state, presence: true
-  validates :billing_address, presence: true
-  validates :shipping_address, presence: true
+  validates :billing_address, presence: true, if: "!self.in_progress?"
+  validates :shipping_address, presence: true, if: "!self.in_progress?"
 
 
   aasm :column => :state do
@@ -41,6 +42,10 @@ class Order < ActiveRecord::Base
     event :cancel, :success => :record_date do
       transitions :from => [:in_progress, :in_queue, :in_delivery], :to => :canceled
     end
+  end
+  
+  def state_enum 
+    aasm.states(:permitted => true).map(&:name)
   end
 
   def record_date
@@ -89,6 +94,36 @@ class Order < ActiveRecord::Base
     # byebug
     return unless can_modify?
     self.total_price = order_items.sum('quantity * price')
+    self.total_price *= (1 - coupon.discount / 100) if coupon
+  end
+  
+  def set_shipping(shipping_id=1)
+    return unless can_modify?
+    shipping = Shipping.find(shipping_id)
+    self.order_shipping = OrderShipping.new(shipping: shipping, price: shipping.price)
+    
+    rescue ActiveRecord::RecordNotFound
+    
+  end
+  
+  def set_coupon_by_code(coupon_code)
+    return unless can_modify?
+    coupon_hash = Coupon.get_coupon_by_code(coupon_code)
+    res = coupon_hash[:status]
+    if (res == :cleared && !self.coupon)||(res == :ok && self.coupon == coupon_hash[:coupon])
+      res = :no_changes
+    elsif res == :ok || res == :cleared
+      self.coupon = coupon_hash[:coupon]
+      calculate_total
+      save
+    end
+    res
+  end
+  
+  def total_price_with_shipping
+    total = self.total_price
+    total += shipping.price if shipping
+    total
   end
   
   def empty!

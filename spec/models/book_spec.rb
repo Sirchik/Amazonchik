@@ -60,4 +60,19 @@ RSpec.describe Book, type: :model do
       expect(books_bc).to be_empty
     end
   end
+  
+  it '#to_s' do
+    @book =  create(:book)
+    expect(@book.to_s).to eql("#{@book.title} by #{@book.author}")
+  end
+
+  xcontext 'image' do
+    it { should have_attached_file(:image) }
+    it { should validate_attachment_presence(:image) }
+    it { should validate_attachment_content_type(:image).
+                  allowing('image/png', 'image/gif').
+                  rejecting('text/plain', 'text/xml') }
+    it { should validate_attachment_size(:image).
+                  less_than(2.megabytes) }
+  end
 end

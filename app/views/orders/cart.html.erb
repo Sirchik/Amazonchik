@@ -27,13 +27,13 @@
 
   <tbody>
     <% @order_items.each_with_index do |order_item, index| %>
-      <tr>
-        <td>
+      <tr id=<%="order_item_#{order_item.id}"%>>
+        <td class='book_image'>
           <%= link_to book_path(order_item.book) do%>
-            <%= image_tag("blank_book.jpg") %>
+            <%= image_tag order_item.book.image.url(:thumb) %>
           <% end %>
           </td>
-        <td>
+        <td class='book_descr'>
           <h4>
             <%= link_to book_path(order_item.book) do%>
               <%= order_item.book %>
@@ -41,9 +41,10 @@
           </h4>
           <%= order_item.book.description %>
         </td>
-        <td><%= order_item.price %></td>
-        <td><%= order_item.quantity %></td>
-        <td><%= order_item.price * order_item.quantity %></td>
+        <td class='book_price'><%= order_item.price %></td>
+        <td class='book_quantity'><%= order_item.quantity %></td>
+        <!--<td><%= number_field_tag order_item.quantity, 1, min: 1, max: 99, id: 'book-quantity' %></td>-->
+        <td class='book_sum'><%= order_item.price * order_item.quantity %></td>
         <td><%= link_to 'X', order_order_item_path(order_item.order, order_item, cart: true), method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
@@ -51,7 +52,7 @@
       <td colspan="3"></td>
       <td><strong>Subtotal:&nbsp</strong></td>
       <td>
-        <strong>
+        <strong id=item_total>
           <%= @order.total_price %>
         </strong>
       </td>
@@ -61,3 +62,58 @@
 <br/>
 <%= link_to 'Empty cart', clear_cart_path, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %>
 <%= link_to 'Continue shopping', books_path, class: 'btn btn-primary' %>
+<div  class="pull-right">
+	<p class="notice"></p>
+  <%= label_tag @order.coupon, @order.coupon ? @order.coupon.code + '(' + @order.coupon.discount.to_s + '%)' : '', id: 'label_coupon_code', style: @order.coupon ? '': 'display: none;'%>
+  <%= text_field_tag @order.coupon, @order.coupon ? @order.coupon.code : nil, placeholder: 'Coupon code', id: 'edit_coupon_code', style: @order.coupon ? 'display: none;' : '' %>
+  <%= button_tag t(:apply), type: 'button', class: 'btn btn-info', id: 'apply_coupon_btn', remote: true, style: @order.coupon ? 'display: none;' : ''  %>
+  <%= link_to 'Checkout', checkout_path, class: 'btn btn-success' %>
+</div>
+
+<script>
+  function toggleCouponView(){
+    $('#edit_coupon_code').toggle();
+    $('#apply_coupon_btn').toggle();
+    $('#label_coupon_code').toggle();
+  };
+  $('#label_coupon_code').click(function (){
+    toggleCouponView();
+  });
+  $('#apply_coupon_btn').click(function (){
+    $.ajax({
+      type: "POST",
+      url: 'set_coupon/' + ($('#edit_coupon_code')[0].value != '' ? $('#edit_coupon_code')[0].value : '~=EMPTY=~'),
+      dataType: "json"     
+    })
+    .then(function( json ) {
+      if (json.status == 'ok') {
+        $('.notice').html('Success');
+        setTimeout('$(".notice").html("")', 3000);
+        $('#item_total')[0].textContent = json.total_price;
+        // $('#edit_coupon_code').hide();
+        // $('#apply_btn').hide();
+        $('#label_coupon_code')[0].textContent = json.coupon.code + "(" + json.coupon.discount +"%)"
+        toggleCouponView();
+      } else if (json.status == 'expired') {
+        $(".notice").html('Coupon was expired');
+        setTimeout('$(".notice").html("")', 3000);
+        // $('#label_coupon_code')[0].textContent = ''
+      } else if (json.status == 'not_found') {
+        $(".notice").html('Coupon is not found');
+        setTimeout('$(".notice").html("")', 3000);
+        // $('#label_coupon_code')[0].textContent = ''
+      } else if (json.status == 'cleared') {
+        $(".notice").html('Coupon cleared');
+        setTimeout('$(".notice").html("")', 3000);
+        $('#label_coupon_code')[0].textContent = ''
+        $('#item_total')[0].textContent = json.total_price;
+      } else if (json.status == 'no_changes') {
+        $(".notice").html('No changes');
+        setTimeout('$(".notice").html("")', 3000);
+        if ($('#label_coupon_code')[0].textContent != '') {
+          toggleCouponView();
+        }
+      };
+    })
+   });
+</script>

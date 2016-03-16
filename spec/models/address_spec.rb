@@ -9,7 +9,7 @@ RSpec.describe Address, type: :model do
   it {should belong_to(:country)}
   it {should belong_to(:user)}
   
-  context '.default!' do
+  context '#default!' do
     it 'set address default true' do
       @user = create(:user)
       @addresses = create_list(:address, 3, user: @user, default: true)
@@ -22,7 +22,7 @@ RSpec.describe Address, type: :model do
     end
   end
   
-  it '.to_s' do
+  it '#to_s' do
     @address = create(:address)
     test_string = "#{@address.address},\n"
     test_string << "#{@address.city},\n"  
