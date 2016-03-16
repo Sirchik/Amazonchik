@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :credit_card do
-    temp_date = Faker::Date.forward(23)
-    number { Faker::Business.credit_card_number }
+    temp_date = Faker::Date.forward(33)
+    number { Faker::Number.number(16) } #Faker::Business.credit_card_number
     cvv "123"
     exp_month { temp_date.month }
     exp_year { temp_date.year }

@@ -1,0 +1,34 @@
+<div class="row">
+  <div class="col-md-4">
+      <%= collection_radio_buttons('shipping', :id, Shipping.all, :id, :name_with_price) do |b| %>
+        <!--content_tag(:div, content_tag(:label) { b.radio_button(:checked => session[:ptype_id], :onchange => 'ptype_set(value)') + b.text },  class: "radio")-->
+        <%= content_tag(:div, content_tag(:label) { b.radio_button( :onChange => 'set_delivery(value);', checked: ('checked' if @order.shipping == b.object)) + b.text },  class: "radio") %>
+      <% end %>
+  </div>
+  <div class="col-md-4">
+  </div>
+  <div class="col-md-4">
+    <h4>ORDER SUMMARY</h4>
+    <div class="form-group">
+      ITEM TOTAL: <span id=item_total><%= @order.total_price %></span><br>
+      SHIPPING: <span id="shipping_cost"><%= @order.shipping ? @order.shipping.price : '0.00' %></span><br>
+      ORDER TOTAL: <span id="order_total"><%= @order.total_price_with_shipping %></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function set_delivery(value){
+    $.ajax({
+      type: "GET",
+      url: "get_shipping_price/"+value,
+      dataType: "json"     
+    })
+    .done(function( json ) {
+      $.each($('span#shipping_cost'), function( i, val ) { val.textContent = json.price})
+      
+      sum_with_shipping = parseFloat($('span#item_total')[0].textContent) + parseFloat($('span#shipping_cost')[0].textContent);
+      $.each($('span#order_total'), function( i, val ) { val.textContent = sum_with_shipping})
+    });
+  };
+</script>

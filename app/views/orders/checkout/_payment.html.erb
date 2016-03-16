@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-md-4">
+    <h4>CREDIT CARD</h4>
+    <div class="form-group">
+      <%= f.collection_select :credit_card, @user.credit_cards, :id, :to_s, {selected: @user.default_credit_card}, {class: "form-control"} %>
+    </div>
+  </div>
+  <div class="col-md-4">
+  </div>
+  <div class="col-md-4">
+    <h4>ORDER SUMMARY</h4>
+    <div class="form-group">
+      ITEM TOTAL: <span id=item_total><%= @order.total_price %></span><br>
+      SHIPPING: <span id="shipping_cost"><%= @order.shipping ? @order.shipping.price : '0.00' %></span><br>
+      ORDER TOTAL: <span id="order_total"><%= @order.total_price_with_shipping %></span>
+    </div>
+  </div>
+</div>

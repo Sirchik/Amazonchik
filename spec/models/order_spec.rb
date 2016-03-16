@@ -3,13 +3,13 @@ require 'aasm/rspec'
 
 RSpec.describe Order, type: :model do
 
-  required_fields = %w(total_price state billing_address shipping_address)
-  other_fields = %w(completed_date)
+  required_fields = %w(total_price state)
+  other_fields = %w(completed_date billing_address shipping_address)
 
   include_examples 'test fields', required_fields, other_fields
 
   it 'by default an order should have "in progress" state' do
-    @order =  Order.new
+    @order =  described_class.new
     expect(@order.state).to eq('in_progress')
   end
   it { should belong_to(:user)}
@@ -17,7 +17,7 @@ RSpec.describe Order, type: :model do
   it { should have_many(:order_items)}
   # it { should belong_to(:billing_address)}
   # it { should belong_to(:shipping_address)}
-  xcontext '.add_item' do #'an order should be able to add a book to the order'
+  context '#add_item' do #'an order should be able to add a book to the order'
     before do
       @order = create(:order, state: 'in_progress')
       @category =  create(:category)
@@ -35,15 +35,15 @@ RSpec.describe Order, type: :model do
     it 'add existing book to existing order' do
       expect { @order.add_item(@book) }.not_to change{ @order.order_items.count }
     end
-    # it 'expect can_modify?' do
-    #   expect(@order).to receive(:can_modify?)
-    #   @order.send(:add_item, @book)
-    # end
-    # it 'cannot add book to completed order' do
-    #   @order = create(:order, state: Order::STATUSES[1], user: @user, credit_card: @credit_card)
-    #   @order.completed_date = DateTime.now
-    #   expect { @order.add_item(@book_new) }.not_to change{ @order.order_items.count }
-    # end
+    it 'expect can_modify?' do
+      expect(@order).to receive(:can_modify?)
+      @order.send(:add_item, @book)
+    end
+    it 'cannot add book to completed order' do
+      @order = create(:order, state: 'delivered', user: @user, credit_card: @credit_card)
+      @order.completed_date = DateTime.now
+      expect { @order.add_item(@book_new) }.not_to change{ @order.order_items.count }
+    end
     it 'raise wrong parametr error' do
       expect { @order.add_item }.to raise_error ArgumentError
     end
@@ -56,7 +56,7 @@ RSpec.describe Order, type: :model do
       @order.add_item(@book_new)
     end
   end
-  # context '.cancel!' do
+  # context '#cancel!' do
   #   before do
   #     @order = create(:order, state: 'in_progress')
   #     @order.cancel!
@@ -75,26 +75,32 @@ RSpec.describe Order, type: :model do
   #     @order.send(:cancel!)
   #   end
   # end
-  # context '.can_modify?' do
-  #   it 'cant modify canceled' do
-  #     @order = create(:order, state: :canceled)
-  #     expect(@order).not_to be_can_modify
-  #   end
-  #   it 'cant modify delivered' do
-  #     @order = create(:order, state: :delivered)
-  #     expect(@order).not_to be_can_modify
-  #   end
-  #   it 'cant modify if completed_date present' do
-  #     @order = create(:order, completed_date: Time.now)
-  #     expect(@order).not_to be_can_modify
-  #   end
-  #   Order::STATUSES.each_with_index { |item, index|
-  #     it { 
-  #       @order = create(:order, state: item)
-  #       expect(@order).to be_can_modify
-  #     } unless index == 0 || item == :delivered
-  #   }
-  # end
+
+  context '#can_modify?' do
+    it 'cant modify canceled' do
+      @order = create(:order, state: :canceled)
+      expect(@order).not_to be_can_modify
+    end
+    it 'cant modify delivered' do
+      @order = create(:order, state: :delivered)
+      expect(@order).not_to be_can_modify
+    end
+    it 'can modify in_progress' do
+      @order = create(:order, state: :in_progress)
+      expect(@order).to be_can_modify
+    end
+    # it 'cant modify if completed_date present' do
+    #   @order = create(:order, completed_date: Time.now)
+    #   expect(@order).not_to be_can_modify
+    # end
+    # described_class.aasm.states.map(&:name).each { |state|
+    #   it { 
+    #     @order = create(:order, state: state)
+    #     expect(@order).to be_can_modify
+    #   } unless state == 'canceled' || state == 'delivered'
+    # }
+  end
+
   # context '.next_state!' do
   #   Order::STATUSES.each_with_index { |item, index|
   #     it { 
@@ -123,7 +129,8 @@ RSpec.describe Order, type: :model do
   #     @order.send(:next_state!)
   #   end
   # end
-  xcontext '.calculate_total' do
+  
+  context '#calculate_total' do
     before do
       @order = create(:order, state: 'in_progress')
       @category =  create(:category)
@@ -145,13 +152,13 @@ RSpec.describe Order, type: :model do
     it 'empty if no order items' do
       expect(@order).to be_empty
     end
-    xit 'not empty if order items present' do
+    it 'not empty if order items present' do
       @category =  create(:category)
       @book =  create(:book, category: @category)
       @order_item = create(:order_item, order: @order, book: @book, price: @book.price)
       expect(@order).not_to be_empty
     end
-    xit 'clears when empty! called' do
+    it 'clears when empty! called' do
       @category =  create(:category)
       @book =  create(:book, category: @category)
       @order_items = create_list(:order_item, 3, order: @order, book: @book, price: @book.price)
@@ -159,12 +166,12 @@ RSpec.describe Order, type: :model do
       expect(@order).to be_empty
     end
   end
+  
   it {should respond_to(:total_price)} # 'an order should be able to return a total price of the order'
   
-  context 'aasm testd' do
+  context 'aasm tests' do
     before do
-      @order = Order.new
-      # subject(order) { Order.new }
+      @order = described_class.new
     end
     it 'event process' do 
       expect(@order).to transition_from(:in_progress).to(:in_queue).on_event(:process)
@@ -185,4 +192,34 @@ RSpec.describe Order, type: :model do
       @order.cancel!
     end
   end
+  
+  it '#state_enum' do
+    @order = described_class.new
+    described_class.aasm.states.map(&:name).each do |state|
+      expect(@order.state_enum).to eql(@order.aasm.states(:permitted => true).map(&:name))
+    end
+  end
+
+  it '#record_date' do
+    @order = described_class.new
+    expect { @order.record_date }.to change{ @order.record_date }
+  end
+
+  it '#total_price_with_shipping' do
+    order = create(:order, total_price: Faker::Number.decimal(2))
+    shipping = create(:shipping)
+    order_shipping = create(:order_shipping, order: order, shipping: shipping, price: shipping.price)
+    totalprice = order.total_price_with_shipping
+    expect(totalprice).to eql(order.total_price + order_shipping.price)
+  end
+  
+  xcontext '#set_shipping' do
+    
+  end
+  
+  it '#to_s' do
+    @order = create(:order)
+    expect(@order.to_s).to eql("##{@order.id}")
+  end
+
 end

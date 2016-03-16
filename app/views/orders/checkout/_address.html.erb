@@ -1,0 +1,168 @@
+<div class="row">
+  <div class="col-md-4">
+    <h4>BILLING ADDRESS</h4>
+    <div id="billing_address">
+      <div class="form-group">
+        <%= f.collection_select :billing_address, @user.addresses, :to_s, :address, {selected: @user.default_address}, {class: "form-control"} %>
+      </div>
+      <div class="form-group">
+        <%= f.text_area :billing_address, rows: 5, id: 'order_billing_address_box', class: "form-control" %>
+      </div>  
+      <button type="button" class="btn btn-primary" id='add_new_billing_address'>Add new</button>
+    </div>
+    <div id="new_billing_address", style="display: none;">
+      <%= form_for(Address.new, remote: true) do |billing_address_builder| %>
+      <%= billing_address_builder.hidden_field(:user_id, value: @user.id) %>
+        <div class="form-group">
+          <%= billing_address_builder.label :address %><br>
+          <%= billing_address_builder.text_field :address, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= billing_address_builder.label :city %><br>
+          <%= billing_address_builder.text_field :city, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= billing_address_builder.label :country %><br>
+          <%= billing_address_builder.collection_select :country, Country.all, :id, :name, {selected: @user.default_address, include_blank: 'Select your country'}, {class: "form-control"} %>
+        </div>
+        <div class="form-group">
+          <%= billing_address_builder.label :zipcode %><br>
+          <%= billing_address_builder.text_field :zipcode, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= billing_address_builder.label :phone %><br>
+          <%= billing_address_builder.text_field :phone, class: "form-control"%>
+        </div>
+        <button type="button" class="btn btn-danger" id='cancel_new_billing_address'>Cancel</button>
+        <button type="button" class="btn btn-success" id='save_new_billing_address'>Save</button>
+      <% end %>
+    </div>
+    
+  </div>
+  <div class="col-md-4">
+    <h4>SHIPPING ADDRESS</h4>
+    <div id="shipping_address">
+      <div class="form-group">
+        <%= f.collection_select :shipping_address, @user.addresses, :to_s, :address, {selected: @user.default_address}, {class: "form-control"} %>
+      </div>
+      <div class="form-group">
+        <%= f.text_area :shipping_address, rows: 5, id: 'order_shipping_address_box', class: "form-control" %>
+      </div>
+      <button type="button" class="btn btn-primary" id='add_new_shipping_address'>Add new</button>
+    </div>
+    <div id="new_shipping_address", style="display: none;">
+      <%= form_for(Address.new, remote: true) do |shipping_address_builder| %>
+      <%= shipping_address_builder.hidden_field(:user_id, value: @user.id) %>
+        <div class="form-group">
+          <%= shipping_address_builder.label :address %><br>
+          <%= shipping_address_builder.text_field :address, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= shipping_address_builder.label :city %><br>
+          <%= shipping_address_builder.text_field :city, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= shipping_address_builder.label :country %><br>
+          <%= shipping_address_builder.collection_select :country, Country.all, :id, :name, {selected: @user.default_address, include_blank: 'Select your country'}, {class: "form-control"} %>
+        </div>
+        <div class="form-group">
+          <%= shipping_address_builder.label :zipcode %><br>
+          <%= shipping_address_builder.text_field :zipcode, class: "form-control"%>
+        </div>
+        <div class="form-group">
+          <%= shipping_address_builder.label :phone %><br>
+          <%= shipping_address_builder.text_field :phone, class: "form-control"%>
+        </div>
+        <button type="button" class="btn btn-danger" id='cancel_new_shipping_address'>Cancel</button>
+        <button type="button" class="btn btn-success" id='save_new_shipping_address'>Save</button>
+      </div>
+    <% end %>
+  </div>
+  <div class="col-md-4">
+    <h4>ORDER SUMMARY</h4>
+    <div class="form-group">
+      ITEM TOTAL: <span id=item_total><%= @order.total_price %></span><br>
+      ORDER TOTAL: <span id="order_total"><%= @order.total_price_with_shipping %></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function(){
+    refreshShippingAddress();
+    refreshBillingAddress();
+  });
+  function refreshShippingAddress() {
+    $('#order_shipping_address_box')[0].value = $('#order_shipping_address')[0].value;
+    $('#confirm_order_shipping_address_box')[0].value = $('#order_shipping_address')[0].value;
+  };
+  function refreshBillingAddress() {
+    $('#order_billing_address_box')[0].value = $('#order_billing_address')[0].value;
+    $('#confirm_order_billing_address_box')[0].value = $('#order_billing_address')[0].value;
+  };
+  
+  $('#order_shipping_address').change(refreshShippingAddress);
+  $('#order_billing_address').change(refreshBillingAddress);
+  
+  $('#add_new_billing_address').click(function(){
+    $('#new_billing_address').show();
+    $('#billing_address').hide();
+    $('input#previous').prop('disabled', true);
+    $('input#next').prop('disabled', true);
+  });
+  
+  $('#add_new_shipping_address').click(function(){
+    $('#new_shipping_address').show();
+    $('#shipping_address').hide();
+    $('input#previous').prop('disabled', true);
+    $('input#next').prop('disabled', true);
+  });
+  
+  $('#cancel_new_shipping_address').click(function(){
+    $('#new_shipping_address input[type=text]').val('')
+    $('#new_shipping_address').hide();
+    $('#shipping_address').show();
+    $('input#previous').prop('disabled', false);
+    $('input#next').prop('disabled', false);
+  });
+  
+  $('#cancel_new_billing_address').click(function(){
+    $('#new_billing_address input[type=text]').val('')
+    $('#new_billing_address').hide();
+    $('#billing_address').show();
+    $('input#previous').prop('disabled', false);
+    $('input#next').prop('disabled', false);
+  });
+  
+  $('#save_new_billing_address').click(function(){
+    address = $('#new_billing_address #address_address').val() + '\n' +
+    $('#new_billing_address #address_city').val() + '\n' +
+    $('#new_billing_address #address_country option:selected').text() + '\n' +
+    $('#new_billing_address #address_zipcode').val() + '\n' +
+    'phone: ' + $('#new_billing_address #address_phone').val();
+    // Here we need to send new address to server
+    $('#order_billing_address').append($('<option>', { value : address }).text($('#new_billing_address #address_address').val()));
+    $("#order_billing_address").val(address);
+    refreshBillingAddress();
+    $('#new_billing_address').hide();
+    $('#billing_address').show();
+    $('input#previous').prop('disabled', false);
+    $('input#next').prop('disabled', false);
+  });
+  
+  $('#save_new_shipping_address').click(function(){
+    address = $('#new_shipping_address #address_address').val() + '\n' +
+    $('#new_shipping_address #address_city').val() + '\n' +
+    $('#new_shipping_address #address_country option:selected').text() + '\n' +
+    $('#new_shipping_address #address_zipcode').val() + '\n' +
+    'phone: ' + $('#new_shipping_address #address_phone').val();
+    // Here we need to send new address to server
+    $('#order_shipping_address').append($('<option>', { value : address }).text($('#new_shipping_address #address_address').val()));
+    $("#order_shipping_address").val(address);
+    refreshShippingAddress();
+    $('#new_shipping_address').hide();
+    $('#shipping_address').show();
+    $('input#previous').prop('disabled', false);
+    $('input#next').prop('disabled', false);
+  });
+</script>

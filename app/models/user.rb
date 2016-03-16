@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
   has_many :orders
   has_many :ratings
   has_many :addresses
+  has_many :credit_cards
   
   validates :email, presence: true
   # validates :password, presence: true
@@ -28,22 +29,33 @@ class User < ActiveRecord::Base
     addresses.where(default: true).first
   end
   
+  def default_credit_card
+    credit_cards.where(default: true).first
+  end
+  
   def recent_orders(count=nil)
     orders.order(id: :desc).limit(count)
   end
   
   def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
-      user.email = auth.info.email
-      user.password = Devise.friendly_token[0,20]
-      if auth.info.first_name.blank?
-        user.firstname = auth.info.name
-      else
-        user.firstname = auth.info.first_name
-        user.lastname = auth.info.last_name
+    if where(provider: auth.provider, uid: auth.uid).count == 0 && exist_user = User.find_by_email(auth.info.email)
+      exist_user.provider = auth.provider
+      exist_user.uid = auth.uid
+      exist_user
+    else
+      where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
+        user.email = auth.info.email
+        user.password = Devise.friendly_token[0,20]
+        # byebug
+        if auth.info.first_name.blank?
+          user.firstname = auth.info.name
+        else
+          user.firstname = auth.info.first_name
+          user.lastname = auth.info.last_name
+        end
+        user.provider = auth.provider
+        user.uid = auth.uid
       end
-      user.provider = auth.provider
-      user.uid = auth.uid
     end
   end
   
@@ -69,7 +81,7 @@ class User < ActiveRecord::Base
   
   def orders_by_status
     orders = {}
-    Order::STATUSES.each do |status|
+    Order.aasm.states.map(&:name).each do |status|
       orders[status] = Order.where(state: status, user_id: id)
     end
     orders

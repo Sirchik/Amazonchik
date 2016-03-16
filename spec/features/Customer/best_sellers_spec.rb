@@ -22,20 +22,16 @@ feature 'User can see best sellers on the main page' do
   end
 
   scenario 'in carousel first item is active' do
-    # car_controls = page.find_all('a.carousel-control')
-    # car_controls.
     click_link('›')
-    # car_controls.last.click
     carousel = page.find('div.carousel-inner')
-    # byebug
     expect(carousel.find_all('div.item')[1]).to eq(carousel.find_all('div.active').last)
   end
 
-  scenario 'some' do
-    visit root_path
-    # byebug
-    expect(page).to have_selector 'div#bestsellerCarousel'
-  end
+  # scenario 'some' do
+  #   visit root_path
+  #   # byebug
+  #   expect(page).to have_selector 'div#bestsellerCarousel'
+  # end
 #   before :each do
 #     User.make(:email => 'user@example.com', :password => 'password')
 #   end

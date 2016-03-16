@@ -1,0 +1,28 @@
+<h1>Confirm page</h1>
+<div class="row">
+  <div class="col-md-4">
+      <div class="form-group">
+        <%= f.text_area :billing_address, rows: 5, id: 'confirm_order_billing_address_box', class: "form-control" %>
+      </div>  
+  </div>
+  <div class="col-md-4">
+      <div class="form-group">
+        <%= f.text_area :shipping_address, rows: 5, id: 'confirm_order_shipping_address_box', class: "form-control" %>
+      </div>
+  </div>
+
+</div>
+
+<script>
+  // $(function(){
+  //   refreshShippingAddress();
+  //   refreshBillingAddress();
+  // });
+  // function refreshShippingAddress() {
+  //   $('#confirm_order_shipping_address_box')[0].value = $('#order_shipping_address')[0].value;
+  // };
+  // function refreshBillingAddress() {
+  //   $('#confirm_order_billing_address_box')[0].value = $('#order_billing_address')[0].value;
+  // };
+
+</script>

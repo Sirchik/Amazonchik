@@ -8,7 +8,7 @@ RSpec.describe Author, type: :model do
 
   it {should have_many(:books)}
   
-  it '.to_s' do
+  it '#to_s' do
     @author = create(:author)
     expect(@author.to_s).to eql("#{@author.firstname} #{@author.lastname}")
   end
